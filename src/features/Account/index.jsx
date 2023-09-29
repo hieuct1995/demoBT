@@ -11,19 +11,13 @@ import { useField, useForm, notEmpty, useDynamicList } from '@shopify/react-form
 
 export function AccountComponent({ data, onSubmitForm }) {
 
-    // const emptyAddressFactory = ({ address, city }) => ({
-    //     address: address,
-    //     city: city
-    // });
-    // const customerAddress =
-    //     useDynamicList([], emptyAddressFactory);
     const nameField = useField({
-        value: data.nameFieldValue,
+        value: data.name,
         validates: [notEmpty('Name is required')],
     });
 
     const emailField = useField({
-        value: data.emailFieldValue,
+        value: data.email,
         validates: [
             notEmpty('Email is required'),
             (value) => {
@@ -34,23 +28,30 @@ export function AccountComponent({ data, onSubmitForm }) {
         ],
     });
 
+    const emptyNewAddress = () => ({
+        address: '',
+        city: '',
+    });
+    const { fields: addresses, addItem } = useDynamicList(data.addresses, emptyNewAddress);
+
     const { fields, submit, submitting } =
         useForm({
             fields: {
                 name: nameField,
                 email: emailField,
-                // address1: useField(data.address1),
-                // city1: useField(data.city1),
-                // address2: useField(data.address2),
-                // city2: useField(data.city2),
-
             },
-            // dynamicLists: {
-            //     customerAddress,
-            //   },
+
             onSubmit: async (form) => {
-                onSubmitForm(form)
-                return { status: 'fail', errors: [{ message: 'bad form data' }] };
+                const formData = {
+                    name: form.name,
+                    email: form.email,
+                    addresses: addresses.map(address => ({
+                        address: address.address.value,
+                        city: address.city.value
+                    }))
+                };
+                onSubmitForm(formData)
+                return { status: 'true'};
             },
         });
 
@@ -77,28 +78,22 @@ export function AccountComponent({ data, onSubmitForm }) {
                         </LegacyCard>
                         <LegacyCard sectioned>
                             <FormLayout>
-                                <TextField
-                                    label="Address(1)"
-                                    {...fields.address1}
-                                    placeholder='your adress'
-                                />
-                                <TextField
-                                    label="City"
-                                    {...fields.city1}
-                                    placeholder='your city'
-                                />
-                                <TextField
-                                    label="Address(2)"
-                                    {...fields.address2}
-                                    placeholder='your adress'
-                                />
-                                <TextField
-                                    label="City"
-                                    {...fields.city2}
-                                    placeholder='your city'
-                                />
+                                {addresses.map((address, index) => (
+                                    <FormLayout key={index}>
+                                        <TextField
+                                            label={`Address(${index + 1})`}
+                                            {...address.address}
+                                            placeholder='your address'
+                                        />
+                                        <TextField
+                                            label="City"
+                                            {...address.city}
+                                            placeholder='your city'
+                                        />
+                                    </FormLayout>
+                                ))}
                                 <div style={{ display: 'flex', justifyContent: 'end', gap: '0.5rem' }}>
-                                    <Button>New Address</Button>
+                                    <Button onClick={() => addItem()}>New Address</Button>
                                     <Button
                                         submit
                                         primary

@@ -6,9 +6,10 @@ import {
     ConversationMinor,
 } from '@shopify/polaris-icons';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export function SideBar({toggleIsLoading}) {
-
+export function SideBar() {
+    const navigate = useNavigate()
     return (
         <Navigation location="/">
             <Navigation.Section
@@ -27,14 +28,14 @@ export function SideBar({toggleIsLoading}) {
                         label: 'Account',
                         icon: HomeFilledMinor,
                         onClick: () => {
-                            toggleIsLoading('account')
+                            navigate('/account')
                         },
                     },
                     {
                         label: 'Address',
                         icon: OrdersMajor,
                         onClick: () => {
-                            toggleIsLoading('address')
+                            navigate('/address')
                         },
                     },
                 ]}
